@@ -312,8 +312,12 @@ export const ChatImpl = memo(
 
       runAnimation();
 
+      console.log('ChatImpl() chatStarted = ', chatStarted);
+
       if (!chatStarted) {
         setFakeLoading(true);
+
+        console.log('ChatImpl() autoSelectTemplate = ', autoSelectTemplate);
 
         if (autoSelectTemplate) {
           const { template, title } = await selectStarterTemplate({
@@ -321,6 +325,9 @@ export const ChatImpl = memo(
             model,
             provider,
           });
+
+          console.log('ChatImpl() template = ', template);
+          console.log('ChatImpl() title = ', title);
 
           if (template !== 'blank') {
             const temResp = await getTemplates(template, title).catch((e) => {
@@ -335,6 +342,38 @@ export const ChatImpl = memo(
 
             if (temResp) {
               const { assistantMessage, userMessage } = temResp;
+
+              // rps
+              const msg = [
+                {
+                  id: `1-${new Date().getTime()}`,
+                  role: 'user',
+                  content: [
+                    {
+                      type: 'text',
+                      text: `[Model: ${model}]\n\n[Provider: ${provider.name}]\n\n${messageContent}`,
+                    },
+                    ...imageDataList.map((imageData) => ({
+                      type: 'image',
+                      image: imageData,
+                    })),
+                  ] as any,
+                },
+                {
+                  id: `2-${new Date().getTime()}`,
+                  role: 'assistant',
+                  content: assistantMessage,
+                },
+                {
+                  id: `3-${new Date().getTime()}`,
+                  role: 'user',
+                  content: `[Model: ${model}]\n\n[Provider: ${provider.name}]\n\n${userMessage}`,
+                  annotations: ['hidden'],
+                },
+              ];
+              console.log('ChatImpl() msg = ', msg);
+              // /. rps
+
               setMessages([
                 {
                   id: `1-${new Date().getTime()}`,
@@ -378,6 +417,26 @@ export const ChatImpl = memo(
             }
           }
         }
+
+        // rps
+        const msg = [
+          {
+            id: `${new Date().getTime()}`,
+            role: 'user',
+            content: [
+              {
+                type: 'text',
+                text: `[Model: ${model}]\n\n[Provider: ${provider.name}]\n\n${messageContent}`,
+              },
+              ...imageDataList.map((imageData) => ({
+                type: 'image',
+                image: imageData,
+              })),
+            ] as any,
+          },
+        ];
+        console.log('ChatImpl() msg = ', msg);
+        // /. rps
 
         // If autoSelectTemplate is disabled or template selection failed, proceed with normal message
         setMessages([

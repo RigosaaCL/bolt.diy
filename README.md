@@ -1,13 +1,141 @@
+# RPS
+
+## Instalación
+
+refs:
+
+> https://www.youtube.com/watch?v=JItHTxqE0KQ
+
+> https://www.youtube.com/watch?v=uHZ7j264aR0
+
+How to Add Users and Databases to Bolt.new Apps
+
+> https://www.youtube.com/watch?v=afvvM2C1YSY
+
+1. Se hizo un fork de bolt.diy
+
+https://github.com/stackblitz-labs/bolt.diy => https://github.com/RigosaaCL/bolt.diy.git
+
+2. Se hizo un clone al local
+
+```bash
+cd C:\RPS\Dev
+git clone https://github.com/RigosaaCL/bolt.diy.git
+```
+
+3. Se instaló las dependencias
+
+```bash
+cd bolt.diy
+pnpm i
+```
+
+**NOTA:** Esto se hizo en Powershell admin, dado que en VS Code falla por permisos en los directorios.
+
+## Configuración base
+
+1. Abrir con VS Code
+
+2. Se modificó el fuente ./app/lib/modules/llm/registry.ts
+
+Se modificó este fuente dado que carga un montón de 'providers' de IA que no usaremos, sólo dejamos activo 'ollama'.
+
+3. Se genera .env
+
+A partir de **.env.example** se generó el archivo **.env**
+
+Se definen las siguientes variables:
+DEFAULT_NUM_CTX=6144
+OLLAMA_API_BASE_URL=ttp://127.0.0.1:11500
+
+## Configuración Ollama
+
+1. Descargamos el modelo **recomendado** (mannix/qwen2.5-coder)
+
+ref: https://ollama.com/mannix/qwen2.5-coder
+
+```bash
+# Primero, ejecutamos el modelo que necesitamos
+$ ollama pull mannix/qwen2.5-coder
+# aca debemos salir de 'ollama run' con '/bye'
+```
+
+Este modelo NO funcionó:
+
+```bash
+# Primero, ejecutamos el modelo que necesitamos
+# $ ollama run qwen2.5:3b
+# aca debemos salir de 'ollama run' con '/bye'
+```
+
+2. Ejecutamos ollama
+
+Con **Powershell (admin)**
+
+```bash
+# Segundo, ejecutamos 'ollama serve' para acceso via API
+$ $env:OLLAMA_DEBUG=1
+$ $env:OLLAMA_HOST="127.0.0.1:11500"
+$ ollama serve
+```
+
+**NOTA:** El modelo ollama a utilizar se setea en el Frontend.
+
+## Ejecución
+
+En terminal de VS Code
+
+```bash
+pnpm run dev
+```
+
+## Configuración Frontend
+
+**NOTA:** Para acceder a la opción #Settings", se debe hacer 'mouse over' sobre el ícono a la izquierda del logo "bolt.diy" que está en la esquina izquierda-superior del Frontend (navegador web), luego en el panel vertical que aparece desde la izquierda, acceder al botón de la parte inferior a la izquierda, el cual corresponde a la opción "Settings".
+
+### Panel de Control en modo Dev
+
+Al acceder a "Settings", se muestra una ventana con nombre "Control Panel" con un montón de widgets con distintas opciones. En la parte superior de esta ventana se ve activa la opción "User Mode", haciendo clic sobre el ON/OFF, se activa la opción "Developer Mode", que permite acceder a más opciones en este mismo Panel de Control.
+
+### Settings > Local Providers (activar Ollama)
+
+Acceder a "Settings" y luego a "Local Providers", luego activar "Ollama (local)", con esto se mostrará el "API Endoint" habilitado en el archivo .env y los modelos que tenemos localmente instalados.
+
+## BD Propia
+
+app\lib\hooks\useDataOperations.ts
+Usa customDb?: IDBDatabase;
+
+db.transaction, se usa en:
+app\lib\persistence\db.ts
+app\lib\persistence\chats.ts
+app\lib\hooks\useDataOperations.ts
+
+app\components\@settings\tabs\data\DataTab.tsx
+// Create a custom hook to connect to the boltHistory database
+const database = await openDatabase();
+import { openDatabase } from '~/lib/persistence/db';
+
+## Send process
+
+app\components\chat\BaseChat.tsx
+<SendButton> => handleSendMessage?.(event) => sendMessage (prop)
+
+ChatImpl > BaseChat
+ChatImpl => sendMessage(messageInput)
+
 # bolt.diy
 
 [![bolt.diy: AI-Powered Full-Stack Web Development in the Browser](./public/social_preview_index.jpg)](https://bolt.diy)
 
 Welcome to bolt.diy, the official open source version of Bolt.new, which allows you to choose the LLM that you use for each prompt! Currently, you can use OpenAI, Anthropic, Ollama, OpenRouter, Gemini, LMStudio, Mistral, xAI, HuggingFace, DeepSeek, or Groq models - and it is easily extended to use any other model supported by the Vercel AI SDK! See the instructions below for running this locally and extending it to include more models.
 
------
+---
+
 Check the [bolt.diy Docs](https://stackblitz-labs.github.io/bolt.diy/) for more offical installation instructions and more informations.
 
------
+---
+
 Also [this pinned post in our community](https://thinktank.ottomator.ai/t/videos-tutorial-helpful-content/3243) has a bunch of incredible resources for running and deploying bolt.diy yourself!
 
 We have also launched an experimental agent called the "bolt.diy Expert" that can answer common questions about bolt.diy. Find it here on the [oTTomator Live Agent Studio](https://studio.ottomator.ai/).
@@ -166,7 +294,7 @@ You have two options for running Bolt.DIY: directly on your machine or using Doc
    ```bash
    pnpm run dev
    ```
-   
+
 ### Option 2: Using Docker
 
 This option requires some familiarity with Docker but provides a more isolated environment.
@@ -259,6 +387,7 @@ This method is recommended for developers who want to:
    ```
 
 4. **Start the Development Server**:
+
    ```bash
    pnpm run dev
    ```
@@ -269,13 +398,14 @@ This method is recommended for developers who want to:
    pnpm install
    pnpm run dev
    ```
-  Hint: Be aware that this can have beta-features and more likely got bugs than the stable release
+   Hint: Be aware that this can have beta-features and more likely got bugs than the stable release
 
->**Open the WebUI to test (Default: http://localhost:5173)**
->   - Beginngers: 
->     - Try to use a sophisticated Provider/Model like Anthropic with Claude Sonnet 3.x Models to get best results
->     - Explanation: The System Prompt currently implemented in bolt.diy cant cover the best performance for all providers and models out there. So it works better with some models, then other, even if the models itself are perfect for >programming
->     - Future: Planned is a Plugin/Extentions-Library so there can be different System Prompts for different Models, which will help to get better results
+> **Open the WebUI to test (Default: http://localhost:5173)**
+>
+> - Beginngers:
+>   - Try to use a sophisticated Provider/Model like Anthropic with Claude Sonnet 3.x Models to get best results
+>   - Explanation: The System Prompt currently implemented in bolt.diy cant cover the best performance for all providers and models out there. So it works better with some models, then other, even if the models itself are perfect for >programming
+>   - Future: Planned is a Plugin/Extentions-Library so there can be different System Prompts for different Models, which will help to get better results
 
 #### Staying Updated
 
@@ -290,7 +420,7 @@ To get the latest changes from the repository:
 2. **Pull Latest Updates**:
 
    ```bash
-   git pull 
+   git pull
    ```
 
 3. **Update Dependencies**:
@@ -361,8 +491,8 @@ Explore upcoming features and priorities on our [Roadmap](https://roadmap.sh/r/o
 
 For answers to common questions, issues, and to see a list of recommended models, visit our [FAQ Page](FAQ.md).
 
-
 # Licensing
+
 **Who needs a commercial WebContainer API license?**
 
 bolt.diy source code is distributed as MIT, but it uses WebContainers API that [requires licensing](https://webcontainers.io/enterprise) for production usage in a commercial, for-profit setting. (Prototypes or POCs do not require a commercial license.) If you're using the API to meet the needs of your customers, prospective customers, and/or employees, you need a license to ensure compliance with our Terms of Service. Usage of the API in violation of these terms may result in your access being revoked.

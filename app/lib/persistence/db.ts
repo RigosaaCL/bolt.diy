@@ -12,6 +12,8 @@ const logger = createScopedLogger('ChatHistory');
 
 // this is used at the top level and never rejects
 export async function openDatabase(): Promise<IDBDatabase | undefined> {
+  console.warn('db.ts::openDatabase()');
+
   if (typeof indexedDB === 'undefined') {
     console.error('indexedDB is not available in this environment.');
     return undefined;
@@ -42,6 +44,8 @@ export async function openDatabase(): Promise<IDBDatabase | undefined> {
 }
 
 export async function getAll(db: IDBDatabase): Promise<ChatHistoryItem[]> {
+  console.warn('db.ts::getAll()');
+
   return new Promise((resolve, reject) => {
     const transaction = db.transaction('chats', 'readonly');
     const store = transaction.objectStore('chats');
@@ -61,6 +65,8 @@ export async function setMessages(
   timestamp?: string,
   metadata?: IChatMetadata,
 ): Promise<void> {
+  console.warn('db.ts::setMessages()');
+
   return new Promise((resolve, reject) => {
     const transaction = db.transaction('chats', 'readwrite');
     const store = transaction.objectStore('chats');
@@ -85,10 +91,14 @@ export async function setMessages(
 }
 
 export async function getMessages(db: IDBDatabase, id: string): Promise<ChatHistoryItem> {
+  console.warn('db.ts::getMessages()');
+
   return (await getMessagesById(db, id)) || (await getMessagesByUrlId(db, id));
 }
 
 export async function getMessagesByUrlId(db: IDBDatabase, id: string): Promise<ChatHistoryItem> {
+  console.warn('db.ts::getMessagesByUrlId() id = ', id);
+
   return new Promise((resolve, reject) => {
     const transaction = db.transaction('chats', 'readonly');
     const store = transaction.objectStore('chats');
@@ -101,6 +111,8 @@ export async function getMessagesByUrlId(db: IDBDatabase, id: string): Promise<C
 }
 
 export async function getMessagesById(db: IDBDatabase, id: string): Promise<ChatHistoryItem> {
+  console.warn('db.ts::getMessagesById() id = ', id);
+
   return new Promise((resolve, reject) => {
     const transaction = db.transaction('chats', 'readonly');
     const store = transaction.objectStore('chats');
@@ -123,6 +135,8 @@ export async function deleteById(db: IDBDatabase, id: string): Promise<void> {
 }
 
 export async function getNextId(db: IDBDatabase): Promise<string> {
+  console.warn('db.ts::getNextId()');
+
   return new Promise((resolve, reject) => {
     const transaction = db.transaction('chats', 'readonly');
     const store = transaction.objectStore('chats');
@@ -138,6 +152,8 @@ export async function getNextId(db: IDBDatabase): Promise<string> {
 }
 
 export async function getUrlId(db: IDBDatabase, id: string): Promise<string> {
+  console.warn('db.ts::getUrlId() id = ', id);
+
   const idList = await getUrlIds(db);
 
   if (!idList.includes(id)) {
@@ -154,6 +170,8 @@ export async function getUrlId(db: IDBDatabase, id: string): Promise<string> {
 }
 
 async function getUrlIds(db: IDBDatabase): Promise<string[]> {
+  console.warn('db.ts::getUrlIds()');
+
   return new Promise((resolve, reject) => {
     const transaction = db.transaction('chats', 'readonly');
     const store = transaction.objectStore('chats');
@@ -214,9 +232,14 @@ export async function createChatFromMessages(
   messages: Message[],
   metadata?: IChatMetadata,
 ): Promise<string> {
+  console.warn('db.ts::createChatFromMessages() description = ', description);
+
   const newId = await getNextId(db);
   const newUrlId = await getUrlId(db, newId); // Get a new urlId for the duplicated chat
+  console.warn('db.ts::createChatFromMessages() newId = ', newId);
+  console.warn('db.ts::createChatFromMessages() newUrlId = ', newUrlId);
 
+  // guarda el mensaje en la BD
   await setMessages(
     db,
     newId,
@@ -231,6 +254,8 @@ export async function createChatFromMessages(
 }
 
 export async function updateChatDescription(db: IDBDatabase, id: string, description: string): Promise<void> {
+  console.warn('db.ts::updateChatDescription() description = ', description);
+
   const chat = await getMessages(db, id);
 
   if (!chat) {
@@ -249,6 +274,8 @@ export async function updateChatMetadata(
   id: string,
   metadata: IChatMetadata | undefined,
 ): Promise<void> {
+  console.warn('db.ts::updateChatMetadata() id = ', id);
+
   const chat = await getMessages(db, id);
 
   if (!chat) {

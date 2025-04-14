@@ -90,13 +90,16 @@ export const selectStarterTemplate = async (options: { message: string; model: s
     system: starterTemplateSelectionPrompt(templates),
   };
   const response = await fetch('/api/llmcall', {
+    // se resuelve en ./app/routes/api.llmcall.ts::llmCallAction() ???
     method: 'POST',
     body: JSON.stringify(requestBody),
   });
   const respJson: { text: string } = await response.json();
-  console.log(respJson);
 
   const { text } = respJson;
+
+  console.log('selectStarterTemplate.ts::selectStarterTemplate() respJson = ', respJson);
+
   const selectedTemplate = parseSelectedTemplate(text);
 
   if (selectedTemplate) {
@@ -130,6 +133,7 @@ const getGitHubRepoContent = async (
     }
 
     // Fetch contents of the path
+    console.log('getGitHubRepoContent() fetch from => ', `${baseUrl}/repos/${repoName}/contents/${path}`);
     const response = await fetch(`${baseUrl}/repos/${repoName}/contents/${path}`, {
       headers,
     });

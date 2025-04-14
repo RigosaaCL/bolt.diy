@@ -25,6 +25,8 @@ async function getModelList(options: {
 const logger = createScopedLogger('api.llmcall');
 
 async function llmCallAction({ context, request }: ActionFunctionArgs) {
+  console.log('api.llmcall.ts::llmCallAction()');
+
   const { system, message, model, provider, streamOutput } = await request.json<{
     system: string;
     message: string;

@@ -59,6 +59,8 @@ export async function getAllChats(db: IDBDatabase): Promise<Chat[]> {
  * @returns A promise that resolves to the chat or null if not found
  */
 export async function getChatById(db: IDBDatabase, id: string): Promise<Chat | null> {
+  console.log('chats.ts::getChatById() id = ', id);
+
   return new Promise((resolve, reject) => {
     const transaction = db.transaction(['chats'], 'readonly');
     const store = transaction.objectStore('chats');
